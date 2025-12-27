@@ -1,9 +1,3 @@
-# object files
-obj/
-
-# program binary
-test
-
 # utils
 utils/
 utils.sh

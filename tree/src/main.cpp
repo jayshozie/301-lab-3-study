@@ -31,8 +31,30 @@ int main() {
     root->set_rhs(new OperandNode(2.0));
 
     root->print();
-    std::cout << std::endl << root->evaluate() << std::endl;
-    std::cout << root->get_height() << std::endl;
+    std::cout << std::endl << root->evaluate() << std::endl;;
+    std::cout << root->get_height() << std::endl;;
+
+    OperatorNode* new_root = new OperatorNode(*root);
+    delete root;
+    new_root->print();
+    std::cout << std::endl;;
+
+    Node* newer_root;
+    newer_root = new_root->clone();
+    delete new_root;
+    newer_root->print();
+    std::cout << std::endl;;
+
+    std::cout << newer_root->count_nodes() << std::endl;
+    // std::cout << "Evaluation: " << newer_root->evaluate() << std::endl;
+    Node* old_root = newer_root;
+    newer_root = newer_root->optimize();
+    if(old_root != newer_root) {
+        delete old_root;
+    }
+    std::cout << "Evaluation: " << newer_root->evaluate() << std::endl;
+
+    delete newer_root;
 
     /*
     delete root->lhs->lhs;
@@ -40,5 +62,4 @@ int main() {
     delete root->lhs;
     delete root->rhs;
     */
-    delete root;
 }
