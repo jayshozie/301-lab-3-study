@@ -1,4 +1,5 @@
 #include "math_parser.h"
+#include <iostream>
 
 int main() {
     // (3 + 5) - 2
@@ -31,6 +32,7 @@ int main() {
 
     root->print();
     std::cout << std::endl << root->evaluate() << std::endl;
+    std::cout << root->get_height() << std::endl;
 
     /*
     delete root->lhs->lhs;

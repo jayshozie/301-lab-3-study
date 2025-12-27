@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <stdexcept>
@@ -23,7 +24,7 @@ public:
         this->rhs = node;
     }
 
-    // virtual int get_height() = 0;
+    virtual int get_height() = 0;
     virtual void print() = 0;
     virtual double evaluate() = 0;
 
@@ -88,6 +89,10 @@ public:
         std::cout << ") ";
     }
 
+    int get_height() override {
+        return 1 + std::max(this->lhs->get_height(), this->rhs->get_height());
+    }
+
     friend class MathExpression;
 };
 
@@ -98,4 +103,5 @@ public:
     double evaluate() override { return this->val; }
 
     void print() override { std::cout << this->val; }
+    int get_height() override { return 0; }
 };
