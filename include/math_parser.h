@@ -13,13 +13,21 @@ public:
         delete this->rhs;
     }
 
-    virtual double evaluate() { return 0.0; }
+    virtual void set_lhs(Node* node) {
+        this->lhs = node;
+    }
+    virtual void set_rhs(Node* node) {
+        this->rhs = node;
+    }
+
+    virtual void print() = 0;
+    virtual double evaluate() = 0;
 
     friend class OperatorNode;
     friend class OperandNode;
 };
 
-class OperatorNode : Node {
+class OperatorNode : public Node {
 public:
     enum operators {
         ADD = '+',
@@ -33,8 +41,6 @@ public:
 
     double evaluate() override
     {
-        /* DEBUG START */
-        /* DEBUG END */
         switch(this->op) {
         case ADD:
             return this->lhs->evaluate() + this->rhs->evaluate();
@@ -52,6 +58,27 @@ public:
         }
     }
 
+    void print() override {
+        std::string op_str;
+        switch(this->op) {
+        case ADD:
+            op_str = "+";
+        case SUB:
+            op_str = "-";
+        case MUL:
+            op_str = "*";
+        case DIV:
+            op_str = "/";
+        default:
+            op_str = "#";
+        }
+        std::cout << "(";
+        this->lhs->print();
+        std::cout << " " << op_str << " ";
+        this->rhs->print();
+        std::cout << ") ";
+    }
+
     friend class MathExpression;
 };
 
@@ -60,4 +87,6 @@ public:
     double val;
     OperandNode(double val): val(val) {} // constructor
     double evaluate() override { return this->val; }
+
+    void print() override { std::cout << this->val; }
 };

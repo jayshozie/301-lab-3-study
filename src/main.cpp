@@ -14,18 +14,20 @@ int main() {
      *  3   5
      */
 
+    /* old
     OperatorNode* root = new OperatorNode(OperatorNode::SUB);
     root->lhs = new OperatorNode(OperatorNode::ADD);
     root->lhs->lhs = new OperandNode(3.0);
     root->lhs->rhs = new OperandNode(5.0);
     root->rhs = new OperandNode(2.0);
+    */
 
-    std::cout << root->lhs->lhs->evaluate() << std::endl;
-    std::cout << root->lhs->rhs->evaluate() << std::endl;
-    std::cout << root->lhs->evaluate() << std::endl;
-    std::cout << root->rhs->evaluate() << std::endl;
+    OperatorNode* root = new OperatorNode(OperatorNode::SUB);
+    /* well, i can't access the root's lhs so what now? */
+    root->set_lhs(new OperandNode(5.0));
+    root->set_rhs(new OperandNode(3.0));
 
-    printf("%.1f\n", root->evaluate());
+    root->print();
 
     /*
     delete root->lhs->lhs;
