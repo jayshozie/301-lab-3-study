@@ -2,22 +2,24 @@
 #include <stdexcept>
 
 class Node {
-public:
+private:
     Node* lhs;
     Node* rhs;
-
-    virtual Node() : lhs(nullptr), rhs(nullptr) {}
-
-    virtual ~Node() {
+public:
+    Node(): lhs(nullptr), rhs(nullptr) {} // virtual constructor
+    virtual ~Node()
+    { // virtual destructor
         delete this->lhs;
         delete this->rhs;
     }
-    virtual double evaluate() {
-        return 0.0;
-    };
+
+    virtual double evaluate() { return 0.0; }
+
+    friend class OperatorNode;
+    friend class OperandNode;
 };
 
-class OperatorNode : public Node {
+class OperatorNode : Node {
 public:
     enum operators {
         ADD = '+',
@@ -25,12 +27,11 @@ public:
         MUL = '*',
         DIV = '/',
     };
-
     operators op;
 
-    OperatorNode(operators op): op(op) {}// constructor
+    OperatorNode(operators op): op(op) {} // constructor
 
-    double evaluate()
+    double evaluate() override
     {
         /* DEBUG START */
         /* DEBUG END */
@@ -50,6 +51,8 @@ public:
             throw std::logic_error("ERR: UNKNOWN OPERATOR");
         }
     }
+
+    friend class MathExpression;
 };
 
 class OperandNode : public Node {
@@ -58,4 +61,3 @@ public:
     OperandNode(double val): val(val) {} // constructor
     double evaluate() override { return this->val; }
 };
-
