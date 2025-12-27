@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <stdexcept>
 
 class Node {
@@ -14,12 +15,25 @@ public:
     }
 
     virtual void set_lhs(Node* node) {
-        this->lhs = node;
+        if(this->lhs == nullptr) {
+            this->lhs = node;
+        }
+        else {
+            delete this->lhs;
+            this->lhs = node;
+        }
     }
     virtual void set_rhs(Node* node) {
-        this->rhs = node;
+        if(this->rhs == nullptr) {
+            this->rhs = node;
+        }
+        else {
+            delete this->rhs;
+            this->rhs = node;
+        }
     }
 
+    // virtual int get_height() = 0;
     virtual void print() = 0;
     virtual double evaluate() = 0;
 
@@ -63,14 +77,19 @@ public:
         switch(this->op) {
         case ADD:
             op_str = "+";
+            break;
         case SUB:
             op_str = "-";
+            break;
         case MUL:
             op_str = "*";
+            break;
         case DIV:
             op_str = "/";
+            break;
         default:
             op_str = "#";
+            break;
         }
         std::cout << "(";
         this->lhs->print();

@@ -1,5 +1,4 @@
 #include "math_parser.h"
-#include <iostream>
 
 int main() {
     // (3 + 5) - 2
@@ -22,12 +21,16 @@ int main() {
     root->rhs = new OperandNode(2.0);
     */
 
+    OperatorNode* left = new OperatorNode(OperatorNode::ADD);
+    left->set_lhs(new OperandNode(3.0));
+    left->set_rhs(new OperandNode(5.0));
+
     OperatorNode* root = new OperatorNode(OperatorNode::SUB);
-    /* well, i can't access the root's lhs so what now? */
-    root->set_lhs(new OperandNode(5.0));
-    root->set_rhs(new OperandNode(3.0));
+    root->set_lhs(left);
+    root->set_rhs(new OperandNode(2.0));
 
     root->print();
+    std::cout << std::endl << root->evaluate() << std::endl;
 
     /*
     delete root->lhs->lhs;
