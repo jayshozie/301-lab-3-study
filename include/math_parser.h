@@ -6,8 +6,13 @@ public:
     Node* lhs;
     Node* rhs;
 
-    virtual ~Node();
-    virtual double evaluate();
+    virtual ~Node() {
+        delete this->lhs;
+        delete this->rhs;
+    }
+    virtual double evaluate() {
+        return 0.0;
+    };
 };
 
 class OperatorNode : public Node {

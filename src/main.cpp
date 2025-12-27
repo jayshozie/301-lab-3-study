@@ -27,9 +27,11 @@ int main() {
 
     printf("%.1f\n", root->evaluate());
 
+    /*
     delete root->lhs->lhs;
     delete root->lhs->rhs;
     delete root->lhs;
     delete root->rhs;
+    */
     delete root;
 }
