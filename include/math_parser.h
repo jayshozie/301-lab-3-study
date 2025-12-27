@@ -15,22 +15,12 @@ public:
     }
 
     virtual void set_lhs(Node* node) {
-        if(this->lhs == nullptr) {
-            this->lhs = node;
-        }
-        else {
-            delete this->lhs;
-            this->lhs = node;
-        }
+        delete this->lhs;
+        this->lhs = node;
     }
     virtual void set_rhs(Node* node) {
-        if(this->rhs == nullptr) {
-            this->rhs = node;
-        }
-        else {
-            delete this->rhs;
-            this->rhs = node;
-        }
+        delete this->rhs;
+        this->rhs = node;
     }
 
     // virtual int get_height() = 0;
