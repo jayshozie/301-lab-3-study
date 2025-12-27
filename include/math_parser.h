@@ -6,6 +6,8 @@ public:
     Node* lhs;
     Node* rhs;
 
+    virtual Node() : lhs(nullptr), rhs(nullptr) {}
+
     virtual ~Node() {
         delete this->lhs;
         delete this->rhs;
@@ -53,10 +55,7 @@ public:
 class OperandNode : public Node {
 public:
     double val;
-    OperandNode(double val): val(val) { // constructor
-        this->lhs = nullptr;
-        this->rhs = nullptr;
-    }
+    OperandNode(double val): val(val) {} // constructor
     double evaluate() override { return this->val; }
 };
 
