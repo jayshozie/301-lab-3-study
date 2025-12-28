@@ -2,7 +2,7 @@
 CC = g++
 
 # needed compiler flags. will change this so that it works with clang too.
-CFLAGS = -MMD -Wall -Wextra -I./include/ -I./src/
+CFLAGS = -g -MMD -Wall -Wextra -I./include/ -I./src/
 
 # automatation of source files
 SRCS_DIR = src
