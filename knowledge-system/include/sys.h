@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdarg>
 #include <cstdint>
 #include <iostream>
@@ -31,22 +32,23 @@ public:
 };
 
 class avl_node {
-public:
-    avl_node(document* data) // avl node constructor
-        : data(data), height(0), lhs(nullptr), rhs(nullptr)
-    {}
-
-    friend class avl_tree;
 private:
     int64_t height;
     document* data;
     avl_node* lhs;
     avl_node* rhs;
+public:
+    avl_node(document* data) // avl node constructor
+        : height(0), data(data), lhs(nullptr), rhs(nullptr)
+    {}
+
+    friend class avl_tree;
 };
 
 class avl_tree {
 public:
     avl_tree(): root(nullptr) {} // constructor
+    ~avl_tree() { this->clear(this->root); }
 
     void insert(document* doc)
     {
@@ -64,6 +66,14 @@ public:
     document* find(uint64_t id) { return this->find(this->root, id); }
 private:
     avl_node* root;
+
+    void clear(avl_node* node)
+    {
+        if(node == nullptr) { return; }
+        this->clear(node->lhs);
+        this->clear(node->rhs);
+        delete node;
+    }
 
     int64_t get_height(avl_node* node)
     {
@@ -275,8 +285,79 @@ private:
 };
 
 class hash_table {
+    // hash formula:
+    // h = (s[0]*(53)^0 + s[1]*(53)^1 + ...) (mod 1009)
 public:
-    std::vector<document*> get_by_tag(std::string tag) {}
+    hash_table()
+    {
+        // initialize the entire table
+        for(uint64_t i = 0; i < 1009; i++) { this->table[i] = nullptr; }
+    } // hash table constructor
+
+    ~hash_table()
+    {
+        for(uint64_t i = 0; i < 1009; i++) {
+            hash_node* curr = this->table[i];
+            while(curr != nullptr) {
+                hash_node* tmp = curr;
+                curr = curr->next;
+                delete tmp;
+            }
+        }
+    }
+
+    void insert(std::string tag, document* doc)
+    {
+        uint64_t index = this->hash(tag);
+        hash_node* new_node = new hash_node();
+        new_node->tag = tag;
+        new_node->doc = doc;
+        new_node->next = this->table[index];
+        this->table[index] = new_node;
+    }
+    std::vector<document*> search(std::string tag)
+    {
+        uint64_t index = this->hash(tag);
+
+        std::vector<document*> ret_vec;
+        hash_node* curr = this->table[index];
+
+        while(curr != nullptr) {
+            if(curr->tag == tag) { ret_vec.push_back(curr->doc); }
+            curr = curr->next;
+        }
+        return ret_vec;
+    }
+private:
+    struct hash_node {
+        std::string tag;
+        document* doc;
+        hash_node* next;
+    };
+
+    hash_node* table[1009];
+
+    uint64_t hash(std::string tag)
+    {
+        uint64_t hash = 0;
+        uint64_t i = 0;
+        uint64_t p = 1;
+        while(i < tag.length()) {
+            // get ascii value
+            uint64_t char_val = tag[i];
+            // normalize the number
+            char_val %= 1009;
+
+            // calculate the current hash value
+            hash += (char_val * p) % 1009;
+
+            // because first char should be multiplied with 1, not 53
+            p = (p * 53) % 1009;
+
+            i++;
+        }
+        return hash % 1009;
+    }
 };
 
 class priority_queue {
@@ -346,7 +427,157 @@ public:
     }
 };
 
-class knowledge_graphs {
+class visited_node_set { // small helper class for knowledge graph
+private:
+    struct visited_node { // linked list of visited nodes
+        uint64_t id;
+        visited_node* next;
+    };
+    visited_node* visited_node_table[101];
 public:
-    void add_referrence(int from_id, int to_id) {}
+    visited_node_set()
+    {
+        for(uint64_t i = 0; i < 101; i++) {
+            this->visited_node_table[i] = nullptr;
+        }
+    } // helper visited node set constructor
+
+    ~visited_node_set()
+    {
+        for(uint64_t i = 0; i < 101; i++) {
+            visited_node* traveler = this->visited_node_table[i];
+            while(traveler != nullptr) {
+                visited_node* saver = traveler->next;
+                ;
+                delete traveler;
+                traveler = saver;
+            }
+        }
+    } // helper visited node set destructor
+
+    uint64_t hash(uint64_t id) { return (id * 2654435761) % 101; }
+
+    void mark(uint64_t id)
+    {
+        uint64_t index = this->hash(id);
+        visited_node* new_node = new visited_node();
+        new_node->id = id;
+        new_node->next = this->visited_node_table[index];
+        this->visited_node_table[index] = new_node;
+    }
+    bool has(uint64_t id)
+    {
+        uint64_t index = this->hash(id);
+        visited_node* curr = this->visited_node_table[index];
+        while(curr != nullptr) {
+            if(curr->id == id) { return true; }
+            curr = curr->next;
+        }
+        return false;
+    }
+};
+class knowledge_graph {
+public:
+    knowledge_graph()
+    {
+        for(uint64_t i = 0; i < 1009; i++) { this->node_table[i] = nullptr; }
+    } // knowledge graph constructor
+
+    ~knowledge_graph()
+    {
+        for(uint64_t i = 0; i < 1009; i++) {
+            graph_node* curr_node = this->node_table[i];
+            while(curr_node != nullptr) {
+                ref* curr_ref = curr_node->refs;
+                /* delete all refs for this node */
+                while(curr_ref != nullptr) {
+                    ref* tmp_ref = curr_ref;
+                    curr_ref = curr_ref->next;
+                    delete tmp_ref;
+                }
+
+                /* delete the graph node itself */
+                graph_node* tmp_node = curr_node;
+                curr_node = curr_node->next;
+                delete tmp_node;
+            }
+        }
+    }
+
+    void add_reference(uint64_t from_id, uint64_t to_id)
+    {
+        uint64_t from_index = this->hash(from_id);
+
+        graph_node* node = this->node_table[from_index];
+        while(node != nullptr) {
+            if(node->from_id == from_id) { break; }
+            else {
+                node = node->next;
+            }
+        }
+        if(node == nullptr) { // no refs
+            graph_node* new_node = new graph_node();
+            node = new_node;
+            node->from_id = from_id;
+            node->refs = nullptr;
+
+            node->next = this->node_table[from_index];
+            this->node_table[from_index] = node;
+        }
+        ref* new_ref = new ref();
+        new_ref->to_id = to_id;
+        new_ref->next = node->refs;
+        node->refs = new_ref;
+
+        // locate node from_id
+        // append to_id to the list of documents that from_id references
+    }
+
+    bool is_reachable(uint64_t source_id, uint64_t target_id)
+    {
+        visited_node_set visited;
+
+        return dfs_recursive(source_id, target_id, visited);
+    }
+private:
+    /* a linked list of the references made in a document */
+    struct ref {
+        uint64_t to_id; // id of the document this document references to
+        ref* next; // next reference in made in this document
+    };
+
+    /* a linked list of the graph nodes */
+    struct graph_node {
+        uint64_t from_id; // id of the document
+        ref* refs; // references made from this node
+        graph_node* next; // next node in the graph
+    };
+
+    graph_node* node_table[1009];
+    uint64_t hash(uint64_t id) { return (id * 2654435761) % 1009; }
+
+    bool dfs_recursive(uint64_t current_id, uint64_t target_id,
+                       visited_node_set& visited_nodes)
+    {
+        if(current_id == target_id) { return true; }
+        if(visited_nodes.has(current_id)) { return false; }
+        visited_nodes.mark(current_id);
+
+        uint64_t index = this->hash(current_id);
+        graph_node* node = this->node_table[index];
+        while(node != nullptr && node->from_id != current_id) {
+            node = node->next;
+        }
+
+        if(node != nullptr) {
+            ref* curr_ref = node->refs;
+            while(curr_ref != nullptr) {
+                if(dfs_recursive(curr_ref->to_id, target_id, visited_nodes)) {
+                    return true;
+                }
+                curr_ref = curr_ref->next;
+            }
+        }
+        return false;
+    }
 };
