@@ -280,8 +280,69 @@ public:
 };
 
 class priority_queue {
+    // min-heap implementation
+    // parent of an index i      : (i-1)/2
+    // left child of an index i  : (2 * i) + 1
+    // right child of an index i : (2 * i) + 2
+private:
+    std::vector<document*> heap;
+
+    void heapify_up(uint64_t doc_ind)
+    {
+        if(doc_ind == 0) { return; }
+
+        uint64_t parent_ind = (doc_ind - 1) / 2;
+        if(this->heap[doc_ind]->priority < this->heap[parent_ind]->priority) {
+            document* tmp = this->heap[doc_ind];
+            this->heap[doc_ind] = this->heap[parent_ind];
+            this->heap[parent_ind] = tmp;
+            this->heapify_up(parent_ind);
+        }
+    }
+    void heapify_down(uint64_t doc_ind)
+    {
+        if(doc_ind == this->heap.size() - 1) { return; }
+
+        uint64_t lhs = (2 * doc_ind) + 1;
+        uint64_t rhs = (2 * doc_ind) + 2;
+        uint64_t smallest = doc_ind;
+        if(this->heap[lhs] != nullptr
+           && (this->heap[lhs]->priority < this->heap[smallest]->priority)) {
+            smallest = lhs;
+        }
+        else if(this->heap[rhs] != nullptr
+                && (this->heap[rhs]->priority
+                    < this->heap[smallest]->priority)) {
+            smallest = rhs;
+        }
+        if(smallest != doc_ind) {
+            // swap
+            document* tmp = this->heap[doc_ind];
+            this->heap[doc_ind] = this->heap[smallest];
+            this->heap[smallest] = tmp;
+
+        }
+        this->heapify_down(smallest);
+    }
 public:
-    document* get_next_task() {}
+    document* get_next_task()
+    {
+        if(this->heap.empty()) { return nullptr; }
+
+        // swap first with last
+        document* tmp = this->heap[0];
+        this->heap[0] = this->heap.back();
+        this->heap.pop_back();
+
+        if(!this->heap.empty()) { this->heapify_down(0); }
+
+        return tmp;
+    }
+    void add_new_task(document* doc)
+    {
+        this->heap.push_back(doc);
+        this->heapify_up(this->heap.size() - 1);
+    }
 };
 
 class knowledge_graphs {
