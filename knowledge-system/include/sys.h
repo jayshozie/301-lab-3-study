@@ -301,18 +301,19 @@ private:
     }
     void heapify_down(uint64_t doc_ind)
     {
-        if(doc_ind == this->heap.size() - 1) { return; }
-
         uint64_t lhs = (2 * doc_ind) + 1;
+        bool lhs_in_bounds = (lhs < this->heap.size()) ? true : false;
+
         uint64_t rhs = (2 * doc_ind) + 2;
+        bool rhs_in_bounds = (rhs < this->heap.size()) ? true : false;
+
         uint64_t smallest = doc_ind;
-        if(this->heap[lhs] != nullptr
-           && (this->heap[lhs]->priority < this->heap[smallest]->priority)) {
+        if(lhs_in_bounds && this->heap[lhs] != nullptr
+           && this->heap[lhs]->priority < this->heap[smallest]->priority) {
             smallest = lhs;
         }
-        else if(this->heap[rhs] != nullptr
-                && (this->heap[rhs]->priority
-                    < this->heap[smallest]->priority)) {
+        if(rhs_in_bounds && this->heap[rhs] != nullptr
+           && this->heap[rhs]->priority < this->heap[smallest]->priority) {
             smallest = rhs;
         }
         if(smallest != doc_ind) {
@@ -321,8 +322,8 @@ private:
             this->heap[doc_ind] = this->heap[smallest];
             this->heap[smallest] = tmp;
 
+            this->heapify_down(smallest);
         }
-        this->heapify_down(smallest);
     }
 public:
     document* get_next_task()
