@@ -22,8 +22,8 @@ public:
 
     void display()
     {
-        std::cout << "\nDoc ID: " << this->id << "\n\n"
-                  << "Content:\n\n"
+        std::cout << "\nDoc ID: " << this->id << "\n"
+                  << "Content:\n"
                   << "--- DOC START ---\n"
                   << this->content << "\n"
                   << "---- DOC END ----\n";
@@ -50,20 +50,18 @@ public:
 
     void insert(document* doc)
     {
-        if(this->root == nullptr) {
-            this->root = this->insert(nullptr, doc); }
+        if(this->root == nullptr) { this->root = this->insert(nullptr, doc); }
         else {
             this->root = this->insert(this->root, doc);
         }
     }
-    document* remove(uint64_t id) {
+    document* remove(uint64_t id)
+    {
         document* doc = nullptr;
         this->root = this->remove(this->root, id, doc);
         return doc;
     }
-    document* find(uint64_t id) {
-        return this->find(this->root, id);
-    }
+    document* find(uint64_t id) { return this->find(this->root, id); }
 private:
     avl_node* root;
 
@@ -76,8 +74,6 @@ private:
     {
         return this->get_height(node->lhs) - this->get_height(node->rhs);
     }
-
-
 
     /*
      * |  before:    |  after:     |
@@ -133,27 +129,41 @@ private:
         return x;
     }
 
-    avl_node* rebalance(avl_node* node, document* doc) {
-        // rebalancing
-        if(this->get_balance(node) > 1) { // Left Heavy
+    avl_node* find_min(avl_node* node)
+    {
+        avl_node* traversal = node->rhs;
+        avl_node* follower = nullptr;
+        while(traversal != nullptr) {
+            follower = traversal;
+            traversal = traversal->lhs;
+        }
+        return follower;
+    }
+
+    avl_node* rebalance(avl_node* node)
+    {
+        int64_t node_balance = this->get_balance(node);
+        if(node_balance > 1) { // Left Heavy
             // L ROTATIONS
-            if(doc->id < node->lhs->data->id) {
+            int64_t lhs_balance = this->get_balance(node->lhs);
+            if(lhs_balance >= 0) {
                 // LL ROTATION
                 return this->rotate_right(node);
             }
-            else if(doc->id > node->lhs->data->id) {
+            else {
                 // LR ROTATION
                 node->lhs = this->rotate_left(node->lhs);
                 return this->rotate_right(node);
             }
         }
-        else if(this->get_balance(node) < -1) { // Right Heavy
+        else if(node_balance < -1) { // Right Heavy
             // R ROTATIONS
-            if(doc->id > node->rhs->data->id) {
+            int64_t rhs_balance = this->get_balance(node->rhs);
+            if(rhs_balance <= 0) {
                 // RR ROTATION
                 return this->rotate_left(node);
             }
-            else if(doc->id < node->rhs->data->id) {
+            else {
                 // RL ROTATION
                 node->rhs = this->rotate_right(node->rhs);
                 return this->rotate_left(node);
@@ -185,10 +195,11 @@ private:
         if(node->rhs != nullptr) { rhs_height = this->get_height(node->rhs); }
         node->height = 1 + std::max(lhs_height, rhs_height);
 
-        return this->rebalance(node, doc);
+        return this->rebalance(node);
     }
 
-    document* find(avl_node* node, uint64_t id) {
+    document* find(avl_node* node, uint64_t id)
+    {
         if(node != nullptr) {
             if(id < node->data->id) {
                 // id is to the left of curr
@@ -207,7 +218,8 @@ private:
         }
     }
 
-    avl_node* remove(avl_node* node, uint64_t id, document*& doc) {
+    avl_node* remove(avl_node* node, uint64_t id, document*& doc)
+    {
         // recursive cases
         if(id < node->data->id) {
             node->lhs = this->remove(node->lhs, id, doc);
@@ -238,24 +250,27 @@ private:
             }
             // two child case
             else {
-                avl_node* traversal = node->rhs;
-                avl_node* follower = nullptr;
-                while(traversal != nullptr) {
-                    follower = traversal;
-                    traversal = traversal->lhs;
-                }
-                node->data = follower->data;
+                avl_node* min = this->find_min(node);
+                node->data = min->data;
                 document* t_doc;
-                node->rhs = this->remove(node->rhs, follower->data->id, t_doc);
+                node->rhs = this->remove(node->rhs, min->data->id, t_doc);
             }
         }
 
         // height correction
         if(node != nullptr) {
-            node->height = this->get_height(node);
+            uint64_t lhs_height = 0;
+            uint64_t rhs_height = 0;
+            if(node->lhs != nullptr) {
+                lhs_height = this->get_height(node->lhs);
+            }
+            if(node->rhs != nullptr) {
+                rhs_height = this->get_height(node->rhs);
+            }
+            node->height = 1 + std::max(lhs_height, rhs_height);
         }
 
-        return this->rebalance(node, doc);
+        return this->rebalance(node);
     }
 };
 
